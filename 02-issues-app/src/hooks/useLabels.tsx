@@ -7,7 +7,7 @@ const dataMock:Label[] = [{"id":791921801,"node_id":"MDU6TGFiZWw3OTE5MjE4MDE=","
 
 export const getLabelsFromAPi = async():Promise<Label[]> => {
   await sleep(2)
-  const res = await githubApi.get<Label[]>('/labels',{
+  const res = await githubApi.get<Label[]>('/labels?per_page=100',{
     headers: {
       Authorization: null
     }

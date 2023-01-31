@@ -3,14 +3,18 @@ import { IssueList } from '../components/IssueList';
 import { LabelPicker } from '../components/LabelPicker';
 import { useIssues } from '../../hooks/useIssues';
 import LoadingIcon from '../../shared/components/LoadingIcon';
+import { State } from '../interfaces/githubIssues';
 
 
 
 export const ListView = () => {
-  const {issuesQuery} = useIssues()
-  //console.log(issuesQuery.data)
-
+  
   const [selectedLabels, setSelectedLabels] = useState<string[]>([])
+  
+  const [state, setState] = useState<State>()
+  
+  const {issuesQuery} = useIssues({state, labels: selectedLabels})
+  //console.log(issuesQuery.data)
 
   const onChangeLabel = (labelName:string): void => {
     ( selectedLabels.includes(labelName)
@@ -26,7 +30,11 @@ export const ListView = () => {
         {
           issuesQuery.isLoading
           ? <LoadingIcon />
-          : <IssueList issues= {issuesQuery.data!} />          
+          : <IssueList 
+                state= { state }
+                issues= {issuesQuery.data!} 
+                onStateChange = { (newState) => setState(newState) }
+            />          
         }
       </div>
       

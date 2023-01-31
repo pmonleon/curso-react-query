@@ -4,6 +4,7 @@ import { FiInfo, FiMessageSquare, FiCheckCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { getIssueComments, getIssueFromAPi } from '../../hooks/useIssue';
 import { Issue, State } from '../interfaces/githubIssues';
+import { timeSince } from '../../helpers/timeSince';
 
 interface Props {
     issue:Issue
@@ -56,7 +57,20 @@ export const IssueItem: FC<Props> = ({ issue }) => {
                 
                 <div className="d-flex flex-column flex-fill px-2">
                     <span>{issue.title}</span>
-                    <span className="issue-subinfo">#{issue.number} opened 2 days ago by <span className='fw-bold'>{issue.user.login}</span></span>
+                    <span className="issue-subinfo">#{issue.number} opened {timeSince(issue.created_at)} ago by <span className='fw-bold'>{issue.user.login}</span></span>
+                    <div>
+                        {
+                            issue.labels.map((item) => (
+                                <span 
+                                    key={item.id} 
+                                    className='badge rounded-pill m-1 label-picker'
+                                    style={{ border: `1px solid #${item.color}`, backgroundColor:`#${item.color}` , color: 'black',  }}
+                                >
+                                    {item.name}
+                                </span>
+                            ))
+                        }
+                    </div>
                 </div>
 
                 <div className='d-flex align-items-center'>

@@ -1,27 +1,28 @@
 import { FC, useMemo, useState } from 'react';
 import { Issue } from '../interfaces';
+import { State } from '../interfaces/githubIssues';
 import { IssueItem } from './IssueItem';
 
 
 interface Props {
     issues: Issue[]
+    state: State | undefined
+    onStateChange: (newState?: State) => void
 }
 
-export const IssueList:FC<Props> = ({issues}) => {
+export const IssueList:FC<Props> = ({issues, state, onStateChange}) => {
 
     
-    const [issueState, setIssueState] = useState<string>('all')
-
     const issuesList:Issue[] = useMemo(() =>{
-        if (issueState === 'all') {
+        if (!state) {
             return issues
         }
-       return issues.filter(issue => issue.state === issueState)
-    }, [issueState])
+       return issues.filter(issue => issue.state === state)
+    }, [state])
     
 
-    const handleIssueState = (state:string):void =>  {
-        setIssueState(state.toLowerCase())
+    const handleIssueState = (state?: State):void =>  {
+        onStateChange(!!state ? state : undefined)
     }
 
     return (
@@ -29,13 +30,13 @@ export const IssueList:FC<Props> = ({issues}) => {
             <div className="card-header bg-dark">
                 <ul className="nav nav-pills card-header-pills">
                     <li className="nav-item">
-                        <a className={`nav-link ${issueState === 'all' ? 'active' : ''}`}  onClick={() => handleIssueState('all')}>All</a>
+                        <a className={`nav-link ${ !state ? 'active' : ''}`}  onClick={() => handleIssueState()}>All</a>
                     </li>
                     <li className='nav-item'>
-                        <a className={`nav-link ${issueState === 'open' ? 'active' : ''}`} onClick={() => handleIssueState('open')}>Open</a>
+                        <a className={`nav-link ${ state === 'open' ? 'active' : ''}`} onClick={() => handleIssueState(State.Open)}>Open</a>
                     </li>
                     <li className="nav-item">
-                        <a className={`nav-link ${issueState === 'closed' ? 'active' : ''}`}  onClick={() => handleIssueState('closed')}>Closed</a>
+                        <a className={`nav-link ${ state === 'closed' ? 'active' : ''}`}  onClick={() => handleIssueState(State.Close)}>Closed</a>
                     </li>
                 </ul>
             </div>

@@ -338,9 +338,30 @@ const dataMock:Issue[] = [
         "state_reason": null
     },
 ]
-export const getIssuesFromAPi = async():Promise<Issue[]> => {
+interface UseIssuesProps {
+    state?: State
+    labels?: string[] 
+}
+
+export const getIssuesFromAPi = async(state?:State, labels?:string[]):Promise<Issue[]> => {
+
+    const params = new URLSearchParams()
+
+
+    if (state) {
+        params.append('state', state)
+    }
+    if (!!labels && labels.length > 0 ) {
+        const labelsString = labels.join(',')
+        params.append('labels', labelsString )
+    }
+
+    params.append('page', '1')
+    params.append('per_page', '5')
+
     await sleep(2)
     const res = await githubApi.get<Issue[]>('/issues',{
+        params
     //   headers: {
     //     Authorization: null
     //   }
@@ -351,13 +372,14 @@ export const getIssuesFromAPi = async():Promise<Issue[]> => {
         return data
     }
 
-export const useIssues = ():  {
+
+export const useIssues = ({state,  labels}:UseIssuesProps):  {
     issuesQuery: UseQueryResult<Issue[], unknown>;
 } => {
     
         const issuesQuery = useQuery(
-            ['queryIssues'],
-            getIssuesFromAPi,
+            ['queryIssues', {state, labels}],
+            () => getIssuesFromAPi(state, labels),
             {
              // staleTime: 1000 * 60 * 60 * 1,
              // initialData: dataMock , // funciona sin el staleTime, no usa data fresh
