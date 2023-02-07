@@ -1,4 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useState } from 'react';
 import { githubApi } from '../../api/githubApi';
 import { sleep } from '../helpers/slepp';
 import { Issue } from '../issues/interfaces/githubIssues';
@@ -31,8 +32,8 @@ export const getIssueComments = async(issueNumber:number):Promise<Issue[]> => {
 export const useIssue= (issueNumber:number): {
     issueQuery: UseQueryResult<Issue, unknown>;
     issueCommentsQuery: UseQueryResult<Issue[], unknown>;
-}  => {
-    
+  }  => {
+       
         const issueQuery = useQuery(
             ['queryIssue', issueNumber],
              () => getIssueFromAPi(issueNumber),
@@ -55,8 +56,10 @@ export const useIssue= (issueNumber:number): {
             }
           )
         return {
+            // Properties
             issueQuery,
-            issueCommentsQuery
+            issueCommentsQuery,
+
         }
 }
 

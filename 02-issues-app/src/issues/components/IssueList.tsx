@@ -1,3 +1,4 @@
+import { InfiniteData } from '@tanstack/react-query';
 import { FC, useMemo, useState } from 'react';
 import { Issue } from '../interfaces';
 import { State } from '../interfaces/githubIssues';
@@ -18,7 +19,7 @@ export const IssueList:FC<Props> = ({issues, state, onStateChange}) => {
             return issues
         }
        return issues.filter(issue => issue.state === state)
-    }, [state])
+    }, [state, issues])
     
 
     const handleIssueState = (state?: State):void =>  {

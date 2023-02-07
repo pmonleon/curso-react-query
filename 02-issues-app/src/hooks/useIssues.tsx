@@ -1,4 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { githubApi } from '../../api/githubApi';
 import { sleep } from '../helpers/slepp';
 import { Issue, State, Type, AuthorAssociation } from '../issues/interfaces/githubIssues';
@@ -343,7 +344,10 @@ interface UseIssuesProps {
     labels?: string[] 
 }
 
-export const getIssuesFromAPi = async(state?:State, labels?:string[]):Promise<Issue[]> => {
+interface GetIssuesProps extends UseIssuesProps {
+    page: number;
+}
+export const getIssuesFromAPi = async({state, labels, page =1}:GetIssuesProps):Promise<Issue[]> => {
 
     const params = new URLSearchParams()
 
@@ -356,7 +360,7 @@ export const getIssuesFromAPi = async(state?:State, labels?:string[]):Promise<Is
         params.append('labels', labelsString )
     }
 
-    params.append('page', '1')
+    params.append('page', page.toString())
     params.append('per_page', '5')
 
     await sleep(2)
@@ -375,20 +379,55 @@ export const getIssuesFromAPi = async(state?:State, labels?:string[]):Promise<Is
 
 export const useIssues = ({state,  labels}:UseIssuesProps):  {
     issuesQuery: UseQueryResult<Issue[], unknown>;
+    page: number | string;
+    nextPage: () => void;
+    previousPage: () => void;
 } => {
+
+    const [page, setPage] = useState<number>(1)
     
-        const issuesQuery = useQuery(
-            ['queryIssues', {state, labels}],
-            () => getIssuesFromAPi(state, labels),
-            {
-             // staleTime: 1000 * 60 * 60 * 1,
-             // initialData: dataMock , // funciona sin el staleTime, no usa data fresh
-             // placeholderData: dataMock
-             // refetchInterval : 1000
-            }
-          )
+    const issuesQuery = useQuery(
+        ['queryIssues', {state, labels, page}],
+        () => getIssuesFromAPi({state, labels, page}),
+        {
+            // staleTime: 1000 * 60 * 60 * 1,
+            // initialData: dataMock , // funciona sin el staleTime, no usa data fresh
+            // placeholderData: dataMock
+            // refetchInterval : 1000
+        }
+        )
+
+        useEffect(() => {
+          setPage(1)
+        }, [state, labels])
+        
+           
+        const nextPage = ():void => {
+             if (issuesQuery.data?.length === 0) {
+                   return
+             } 
+             setPage( (prev:number) => prev + 1 )
+ 
+             // issuesQuery.refetch()
+          }
+
+        const previousPage = ():void => {
+             if (page === 1) {
+                   return
+             } 
+             setPage( (prev:number) => prev - 1 )
+ 
+             // issuesQuery.refetch()
+          }
+
         return {
-            issuesQuery
+            // Properties
+            issuesQuery,
+            // Getter
+            page: issuesQuery.isLoading ? 'Loading' : page ,
+            // Methods
+            nextPage,
+            previousPage
         }
 }
 
